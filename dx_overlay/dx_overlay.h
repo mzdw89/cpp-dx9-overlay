@@ -18,12 +18,13 @@ namespace forceinline {
 		void begin_rendering( );
 		void end_rendering( );
 
+		IDirect3DDevice9* get_device( );
 		HWND get_overlay_wnd( );
 		int get_fps( );
 
 		bool is_initialized( );
 
-	//private:
+	private:
 		void create_overlay( HINSTANCE instance, std::wstring_view parent_class, std::wstring_view parent_window );
 		void init_dx9( );
 

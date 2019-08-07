@@ -46,12 +46,16 @@ namespace forceinline {
 		m_device->Present( NULL, NULL, NULL, NULL );
 	}
 
-	HWND dx_overlay::get_overlay_wnd( ) {
-		return m_overlay_wnd;
+	IDirect3DDevice9* dx_overlay::get_device( ) {
+		return m_device;
 	}
 
 	int dx_overlay::get_fps( ) {
 		return m_fps;
+	}
+
+	HWND dx_overlay::get_overlay_wnd( ) {
+		return m_overlay_wnd;
 	}
 
 	bool dx_overlay::is_initialized( ) {
