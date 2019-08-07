@@ -1,1 +1,11 @@
-cpp-dx9-overlay
+# DirectX9 Overlay
+
+A DirectX9 Overlay written in C++. How to use it is given in the example.cpp file.
+
+### Prerequisites
+
+You will need the DirectX SDK to use and compile this.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
