@@ -1,6 +1,8 @@
 #include "dx_overlay.h"
 
 #include <iostream>
+#include <dwmapi.h>
+#pragma comment(lib, "dwmapi.lib")
 
 namespace forceinline {
 	dx_overlay::dx_overlay( HINSTANCE instance, std::wstring_view parent_class, std::wstring_view parent_window ) {
@@ -23,6 +25,17 @@ namespace forceinline {
 		} catch ( const std::exception& e ) {
 			std::cerr << e.what( ) << std::endl;
 		}
+	}
+
+	dx_overlay::~dx_overlay( ) {
+		if ( m_overlay_wnd )
+			DestroyWindow( m_overlay_wnd );
+
+		if ( m_d3d )
+			m_d3d->Release( );
+
+		if ( m_device )
+			m_device->Release( );
 	}
 
 	void dx_overlay::begin_rendering( ) {
@@ -93,8 +106,8 @@ namespace forceinline {
 			throw std::exception( "dx_overlay::create_overlay: failed to create overlay window" );
 
 		DWORD cur_style = GetWindowLong( m_overlay_wnd, GWL_EXSTYLE );	
-		SetWindowLong( m_overlay_wnd, GWL_EXSTYLE, cur_style | WS_EX_LAYERED | WS_EX_TRANSPARENT );
-		SetLayeredWindowAttributes( m_overlay_wnd, RGB( 0, 0, 0 ), 255, ULW_COLORKEY | LWA_ALPHA );
+		SetWindowLong( m_overlay_wnd, GWL_EXSTYLE, cur_style | WS_EX_LAYERED | WS_EX_TRANSPARENT );	
+		SetLayeredWindowAttributes( m_overlay_wnd, RGB( 0, 0, 0 ), 255, LWA_COLORKEY | LWA_ALPHA );
 
 		ShowWindow( m_overlay_wnd, SW_SHOW );
 	}
@@ -110,10 +123,8 @@ namespace forceinline {
 
 		d3d_pp.Windowed = true;
 		d3d_pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-		d3d_pp.BackBufferFormat = D3DFMT_A8R8G8B8;
+		d3d_pp.BackBufferFormat = D3DFMT_UNKNOWN;
 		d3d_pp.hDeviceWindow = m_overlay_wnd;
-		d3d_pp.EnableAutoDepthStencil = true;
-		d3d_pp.AutoDepthStencilFormat = D3DFMT_D16;
 		d3d_pp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 		
 		if ( FAILED( m_d3d->CreateDevice( D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, m_overlay_wnd, D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3d_pp, &m_device ) ) ) {
@@ -125,6 +136,21 @@ namespace forceinline {
 	}
 
 	LRESULT CALLBACK dx_overlay::m_wnd_proc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam ) {
-		return DefWindowProc( wnd, msg, wparam, lparam );
+		MARGINS m{ 0, 0, 0, 1 };
+
+		switch ( msg ) {
+			case WM_CREATE:
+				DwmExtendFrameIntoClientArea( wnd, &m );
+				SetWindowPos( wnd, NULL, 0, 0, 0, 0, SWP_NOZORDER | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED );
+				return TRUE;
+			case WM_NCCALCSIZE:
+				if ( wparam == TRUE ) {
+					SetWindowLong( wnd, NULL, NULL );
+					return TRUE;
+				}
+				return FALSE;
+			default:
+				return DefWindowProc( wnd, msg, wparam, lparam );
+		}
 	}
 }
