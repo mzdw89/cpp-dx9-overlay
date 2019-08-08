@@ -12,15 +12,16 @@
 namespace forceinline {
 	class dx_overlay {
 	public:
-		//Only allow direct initialization
-		explicit dx_overlay( HINSTANCE instance, std::wstring_view parent_class, std::wstring_view parent_window );
+		dx_overlay( ) { }
+		dx_overlay( HINSTANCE instance, std::wstring_view parent_class, std::wstring_view parent_window );
+		~dx_overlay( );
 
 		void begin_rendering( );
 		void end_rendering( );
 
 		IDirect3DDevice9* get_device( );
-		HWND get_overlay_wnd( );
 		int get_fps( );
+		HWND get_overlay_wnd( );
 
 		bool is_initialized( );
 
