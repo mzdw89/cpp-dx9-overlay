@@ -1,4 +1,5 @@
 #include "dx_overlay/dx_overlay.h"
+#include <thread>
 
 int main( ) {
 	forceinline::dx_overlay overlay( proc_instance, L"CoDBlackOps", L"Call of Duty®: Black Ops II - Multiplayer" );
@@ -21,6 +22,6 @@ int main( ) {
 			overlay.end_rendering( );
 		}
 
-		Sleep( 1 );
+		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	}
 }
