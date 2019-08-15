@@ -13,23 +13,19 @@ namespace forceinline {
 		anti-cheat the game has to avoid being banned.
 	*/
 	dx_overlay::dx_overlay( std::wstring_view target_class, std::wstring_view target_window, bool not_topmost ) {
-		try {
-			m_not_topmost = not_topmost;
+		m_not_topmost = not_topmost;
 
-			if ( target_window.empty( ) && target_class.empty( ) )
-				throw std::invalid_argument( "dx_overlay::dx_overlay: target_class and target_window empty" );
+		if ( target_window.empty( ) && target_class.empty( ) )
+			throw std::invalid_argument( "dx_overlay::dx_overlay: target_class and target_window empty" );
 
-			if ( !FindWindowW( target_class.empty( ) ? NULL : target_class.data( ), target_window.empty( ) ? NULL : target_window.data( ) ) ) {
-				std::string target_class_mb( target_class.begin( ), target_class.end( ) );
-				std::string target_window_mb( target_window.begin( ), target_window.end( ) );
+		if ( !FindWindowW( target_class.empty( ) ? NULL : target_class.data( ), target_window.empty( ) ? NULL : target_window.data( ) ) ) {
+			std::string target_class_mb( target_class.begin( ), target_class.end( ) );
+			std::string target_window_mb( target_window.begin( ), target_window.end( ) );
 
-				throw std::invalid_argument( "dx_overlay::dx_overlay: target window \"" + target_window_mb + "\" with target class \"" + target_class_mb + "\" could not be found" );
-			}
-
-			create_overlay( target_class, target_window );
-		} catch ( const std::exception& e ) {
-			std::cerr << e.what( ) << std::endl;
+			throw std::invalid_argument( "dx_overlay::dx_overlay: target window \"" + target_window_mb + "\" with target class \"" + target_class_mb + "\" could not be found" );
 		}
+
+		create_overlay( target_class, target_window );
 	}
 
 	dx_overlay::~dx_overlay( ) {
