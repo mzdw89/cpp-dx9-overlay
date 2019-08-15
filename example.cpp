@@ -2,26 +2,30 @@
 #include <thread>
 
 int main( ) {
-	forceinline::dx_overlay overlay( L"CoDBlackOps", L"Call of Duty®: Black Ops II - Multiplayer", true /*Read comments regarding this*/ );
+	try {
+		forceinline::dx_overlay overlay( L"CoDBlackOps", L"Call of Duty®: Black Ops II - Multiplayer", true /*Read comments regarding this*/ );
 
-	if ( !overlay.is_initialized( ) )
-		return 0;
+		if ( !overlay.is_initialized( ) )
+			return -1;
 
-	MSG m;
-	ZeroMemory( &m, sizeof( m ) );
+		MSG m;
+		ZeroMemory( &m, sizeof( m ) );
 
-	while ( m.message != WM_QUIT ) {
-		if ( PeekMessage( &m, overlay.get_overlay_wnd( ), NULL, NULL, PM_REMOVE ) ) {
-			TranslateMessage( &m );
-			DispatchMessage( &m );
-		} else {
-			overlay.begin_rendering( );
+		forceinline::dx_renderer renderer = overlay.create_renderer( );
 
-			/*render here*/
+		while ( m.message != WM_QUIT ) {
+			if ( PeekMessage( &m, overlay.get_overlay_wnd( ), NULL, NULL, PM_REMOVE ) ) {
+				TranslateMessage( &m );
+				DispatchMessage( &m );
+			} 
 
-			overlay.end_rendering( );
+			renderer.begin_rendering( );
+			
+			renderer.draw_text( std::to_string( renderer.get_fps( ) ), 2, 2, 0xFFFFFFFF, false );
+			
+			renderer.end_rendering( );
+			
+			std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 		}
-
-		std::this_thread::sleep_for( std::chrono::milliseconds( 1 ) );
 	}
 }
