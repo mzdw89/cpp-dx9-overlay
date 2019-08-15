@@ -1,13 +1,5 @@
 #pragma once
-#include <string>
-#include <thread>
-
-#include <Windows.h>
-
-#include <d3d9.h>
-#include <d3dx9.h>
-#pragma comment (lib, "d3d9.lib")
-#pragma comment (lib, "d3dx9.lib")
+#include "../dx_renderer/dx_renderer.h"
 
 namespace forceinline {
 	class dx_overlay {
@@ -22,11 +14,7 @@ namespace forceinline {
 		dx_overlay( std::wstring_view target_class, std::wstring_view target_window, bool not_topmost = false );
 		~dx_overlay( );
 
-		void begin_rendering( );
-		void end_rendering( );
-
-		IDirect3DDevice9* get_device( );
-		int get_fps( );
+		dx_renderer create_renderer( );
 		HWND get_overlay_wnd( );
 
 		bool is_initialized( );
@@ -36,9 +24,11 @@ namespace forceinline {
 		void init_dx9( );
 
 		int m_fps = 0;
-		bool m_initialized = false, m_not_topmost = false;
+		bool m_initialized = false;
+		
+		static bool m_not_topmost;
 
-		HWND m_overlay_wnd = nullptr, m_target_wnd = nullptr;
+		static HWND m_overlay_wnd, m_target_wnd;
 		wnd_rect_t m_overlay_wnd_size, m_target_wnd_size;
 
 		IDirect3D9* m_d3d = nullptr;

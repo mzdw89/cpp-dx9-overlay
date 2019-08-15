@@ -39,51 +39,8 @@ namespace forceinline {
 			m_device->Release( );
 	}
 
-	void dx_overlay::begin_rendering( ) {
-		//Imitate WS_EX_TOPMOST if specified
-		if ( m_not_topmost ) {
-			//Grab target window RECT
-			int p_x = m_target_wnd_size.left,
-				p_y = m_target_wnd_size.top,
-				p_w = m_target_wnd_size.width( ),
-				p_h = m_target_wnd_size.height( );
-
-			//Set the target windows z position to be under our overlay
-			SetWindowPos( m_target_wnd, m_overlay_wnd, p_x, p_y, p_w, p_h, SWP_NOMOVE | SWP_NOSIZE );
-		}
-
-		m_device->Clear( NULL, NULL, D3DCLEAR_TARGET, D3DCOLOR_ARGB( 0, 0, 0, 0 ), 1.f, 0 );
-		m_device->BeginScene( );
-	}
-
-	void dx_overlay::end_rendering( ) {
-		static int fps = 0;
-		static float last_tick_count = 0.f;
-
-		//Increase FPS
-		fps++;
-
-		//Get current time
-		float cur_tick_count = clock( ) * 0.001f;
-
-		//Check if the FPS haven't been updated for 1s or longer
-		if ( cur_tick_count - last_tick_count >= 1.f ) {
-			//Update our FPS
-			last_tick_count = cur_tick_count;
-			m_fps = fps;
-			fps = 0;
-		}
-
-		m_device->EndScene( );
-		m_device->Present( NULL, NULL, NULL, NULL );
-	}
-
-	IDirect3DDevice9* dx_overlay::get_device( ) {
-		return m_device;	//Return our DirectX device pointer
-	}
-
-	int dx_overlay::get_fps( ) {
-		return m_fps;	//Return our overlays FPS
+	dx_renderer dx_overlay::create_renderer( ) {
+		return dx_renderer( m_device );	//Return a renderer object
 	}
 
 	HWND dx_overlay::get_overlay_wnd( ) {
@@ -106,7 +63,7 @@ namespace forceinline {
 		wc.hInstance = NULL;
 		wc.hIcon = NULL;
 		wc.hCursor = LoadCursor( NULL, IDC_ARROW );
-		wc.hbrBackground = NULL;
+		wc.hbrBackground = HBRUSH( RGB( 0, 0, 0 ) );
 		wc.lpszMenuName = "";
 		wc.lpszClassName = "forceinline::dx_overlay";
 		wc.hIconSm = NULL;
@@ -121,8 +78,15 @@ namespace forceinline {
 		//Get the size of our target window
 		GetWindowRect( m_target_wnd, &m_target_wnd_size );
 
+		//Make the window transparent
+		DWORD ex_styles = WS_EX_LAYERED | WS_EX_TRANSPARENT;
+
+		//Add WS_EX_TOPMOST if we choose
+		if ( !m_not_topmost )
+			ex_styles |= WS_EX_TOPMOST;
+
 		//Create our window
-		m_overlay_wnd = CreateWindowExA( NULL, "forceinline::dx_overlay", "", WS_POPUP | WS_VISIBLE,
+		m_overlay_wnd = CreateWindowExA( ex_styles, "forceinline::dx_overlay", "", WS_POPUP | WS_VISIBLE,
 										 m_target_wnd_size.left, m_target_wnd_size.top, m_target_wnd_size.width( ), m_target_wnd_size.height( ), NULL, NULL, NULL, NULL );
 
 		if ( !m_overlay_wnd )
@@ -132,18 +96,8 @@ namespace forceinline {
 		MARGINS m = { m_target_wnd_size.left, m_target_wnd_size.top, m_target_wnd_size.width( ), m_target_wnd_size.height( ) };
 		DwmExtendFrameIntoClientArea( m_overlay_wnd, &m );
 
-		//Set new window style		
-		DWORD new_style = WS_EX_LAYERED | WS_EX_TRANSPARENT;
-
-		//Set our window to be topmost if we aren't trying to bypass anything
-		if ( !m_not_topmost )
-			new_style |= WS_EX_TOPMOST;
-
-		//Make our window layered and transparent
-		SetWindowLong( m_overlay_wnd, GWL_EXSTYLE, new_style );
-
 		//Set window to use alpha channel
-		SetLayeredWindowAttributes( m_overlay_wnd, RGB( 0, 0, 0 ), 255, LWA_COLORKEY | LWA_ALPHA );
+		SetLayeredWindowAttributes( m_overlay_wnd, RGB( 0, 0, 0 ), 255, LWA_ALPHA );
 
 		//Show our window
 		ShowWindow( m_overlay_wnd, SW_SHOW );
@@ -166,7 +120,9 @@ namespace forceinline {
 		//Set our device parameters
 		d3d_pp.Windowed = true;
 		d3d_pp.SwapEffect = D3DSWAPEFFECT_DISCARD;
-		d3d_pp.BackBufferFormat = D3DFMT_UNKNOWN;
+		d3d_pp.BackBufferFormat = D3DFMT_A8R8G8B8;
+		d3d_pp.BackBufferWidth = m_target_wnd_size.width( );
+		d3d_pp.BackBufferHeight = m_target_wnd_size.height( );
 		d3d_pp.hDeviceWindow = m_overlay_wnd;
 		d3d_pp.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 
@@ -180,11 +136,19 @@ namespace forceinline {
 		m_initialized = true;
 	}
 
+	bool dx_overlay::m_not_topmost = false;
+	HWND dx_overlay::m_target_wnd, dx_overlay::m_overlay_wnd;
+
 	LRESULT CALLBACK dx_overlay::m_wnd_proc( HWND wnd, UINT msg, WPARAM wparam, LPARAM lparam ) {
-		/*
-		TODO:
-		Find out if our target windows size changed and adjust accordingly
-		*/
+		//Imitate WS_EX_TOPMOST if specified
+		if ( m_not_topmost ) {
+			//Grab target window RECT
+			wnd_rect_t r;
+			GetWindowRect( m_target_wnd, &r );
+
+			//Set the target windows z position to be under our overlay
+			SetWindowPos( m_target_wnd, m_overlay_wnd, r.left, r.top, r.width( ), r.height( ), SWP_NOMOVE | SWP_NOSIZE );
+		}
 
 		switch ( msg ) {
 			case WM_DESTROY:
