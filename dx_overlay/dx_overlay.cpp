@@ -38,9 +38,10 @@ namespace forceinline {
 		if ( m_device )
 			m_device->Release( );
 	}
-
+	
+	//As this creates a new object, be careful where you call this.
 	dx_renderer dx_overlay::create_renderer( ) {
-		return dx_renderer( m_device );	//Return a renderer object
+		return dx_renderer( m_device );	
 	}
 
 	HWND dx_overlay::get_overlay_wnd( ) {
