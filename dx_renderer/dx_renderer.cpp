@@ -100,7 +100,7 @@ namespace forceinline {
 			x -= ( dimensions.right - dimensions.left ) / 2;
 		}
 
-		auto _text = [ & ]( std::string_view _text, int _x, int _y, unsigned long _color ) {
+		auto _text = [ & ]( std::wstring_view _text, int _x, int _y, unsigned long _color ) {
 			RECT r{ _x, _y, _x, _y };
 			m_font->DrawTextW( NULL, _text.data( ), -1, &r, DT_NOCLIP, _color );
 		};
