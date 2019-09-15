@@ -31,9 +31,9 @@ namespace forceinline {
 		void draw_rect( int x, int y, int w, int h, unsigned long color );
 		void draw_filled_rect( int x, int y, int w, int h, unsigned long color );
 		void draw_outlined_rect( int x, int y, int w, int h, unsigned long color );
-		void draw_text( std::string_view text, int x, int y, unsigned long color, bool center = true, bool outline = true );
+		void draw_text( std::wstring_view text, int x, int y, unsigned long color, bool center = true, bool outline = true );
 
-		RECT get_text_dimensions( std::string_view text );
+		RECT get_text_dimensions( std::wstring_view text );
 
 	private:
 		int m_fps = 0;

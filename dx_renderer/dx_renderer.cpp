@@ -55,18 +55,7 @@ namespace forceinline {
 		return m_fps; //Return our overlay's FPS
 	}
 
-	void dx_renderer::draw_line( int x0, int y0, int x1, int y1, unsigned long color ) {
-		/*D3DTLVERTEX qV[ 2 ] = {
-			{ float( x0 ), float( y0 ), 0.f, 1.f, color },
-			{ float( x1 ), float( y1 ), 0.f, 1.f, color },
-		};
-
-		m_device->SetRenderState( D3DRS_ALPHABLENDENABLE, true );
-		m_device->SetRenderState( D3DRS_DESTBLEND, D3DBLEND_INVSRCALPHA );
-		m_device->SetFVF( D3DFVF_XYZRHW | D3DFVF_DIFFUSE | D3DFVF_TEX1 );
-		m_device->SetTexture( 0, nullptr );
-		m_device->DrawPrimitiveUP( D3DPT_LINELIST, 2, qV, sizeof( D3DTLVERTEX ) );*/
-		
+	void dx_renderer::draw_line( int x0, int y0, int x1, int y1, unsigned long color ) {		
 		D3DXVECTOR2 lines[ 2 ] = {
 			D3DXVECTOR2( x0, y0 ),
 			D3DXVECTOR2( x1, y1 )
@@ -105,7 +94,7 @@ namespace forceinline {
 		draw_rect( x, y, w, h, color );
 	}
 
-	void dx_renderer::draw_text( std::string_view text, int x, int y, unsigned long color, bool center, bool outline ) {
+	void dx_renderer::draw_text( std::wstring_view text, int x, int y, unsigned long color, bool center, bool outline ) {
 		if ( center ) {
 			RECT dimensions = get_text_dimensions( text );
 			x -= ( dimensions.right - dimensions.left ) / 2;
@@ -113,7 +102,7 @@ namespace forceinline {
 
 		auto _text = [ & ]( std::string_view _text, int _x, int _y, unsigned long _color ) {
 			RECT r{ _x, _y, _x, _y };
-			m_font->DrawTextA( NULL, _text.data( ), -1, &r, DT_NOCLIP, _color );
+			m_font->DrawTextW( NULL, _text.data( ), -1, &r, DT_NOCLIP, _color );
 		};
 
 		if ( outline ) {
@@ -126,9 +115,9 @@ namespace forceinline {
 		_text( text, x, y, color );
 	}
 
-	RECT dx_renderer::get_text_dimensions( std::string_view text ) {
+	RECT dx_renderer::get_text_dimensions( std::wstring_view text ) {
 		RECT r;
-		m_font->DrawTextA( NULL, text.data( ), -1, &r, DT_CALCRECT, 0xFFFFFFFF );
+		m_font->DrawTextW( NULL, text.data( ), -1, &r, DT_CALCRECT, 0xFFFFFFFF );
 		return r;
 	}
 }
