@@ -18,7 +18,7 @@ namespace forceinline {
 		if ( target_window.empty( ) && target_class.empty( ) )
 			throw std::invalid_argument( "dx_overlay::dx_overlay: target_class and target_window empty" );
 
-		if ( !FindWindowW( target_class.empty( ) ? NULL : target_class.data( ), target_window.empty( ) ? NULL : target_window.data( ) ) ) {
+		if ( m_target_wnd = FindWindowW( target_class.empty( ) ? NULL : target_class.data( ), target_window.empty( ) ? NULL : target_window.data( ) ); !m_target_wnd ) {
 			std::string target_class_mb( target_class.begin( ), target_class.end( ) );
 			std::string target_window_mb( target_window.begin( ), target_window.end( ) );
 
@@ -48,10 +48,6 @@ namespace forceinline {
 		return m_overlay_wnd;	//Return our window handle
 	}
 
-	bool dx_overlay::is_initialized( ) {
-		return m_initialized;	//Is our overlay initialized properly?
-	}
-
 	void dx_overlay::create_overlay( std::wstring_view target_class, std::wstring_view target_window ) {
 		WNDCLASSEX wc;
 		wc.cbSize = sizeof( wc );
@@ -72,9 +68,6 @@ namespace forceinline {
 		//Register our window class
 		if ( !RegisterClassExA( &wc ) )
 			throw std::exception( "dx_overlay::create_overlay: failed to register wndclassex" );
-
-		//Find our target window
-		m_target_wnd = FindWindowW( target_class.data( ), target_window.data( ) );
 
 		//Get the size of our target window
 		GetWindowRect( m_target_wnd, &m_target_wnd_size );
@@ -132,9 +125,6 @@ namespace forceinline {
 			m_d3d->Release( );
 			throw std::exception( "dx_overlay::init_dx9: failed to create device" );
 		}
-
-		//Overlay successfully initialized
-		m_initialized = true;
 	}
 
 	bool dx_overlay::m_not_topmost = false;

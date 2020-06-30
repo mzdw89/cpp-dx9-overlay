@@ -17,14 +17,11 @@ namespace forceinline {
 		dx_renderer create_renderer( );
 		HWND get_overlay_wnd( );
 
-		bool is_initialized( );
-
 	private:
 		void create_overlay( std::wstring_view target_class, std::wstring_view target_window );
 		void init_dx9( );
 
 		int m_fps = 0;
-		bool m_initialized = false;
 		
 		static bool m_not_topmost;
 
