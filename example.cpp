@@ -5,9 +5,6 @@ int main( ) {
 	try {
 		forceinline::dx_overlay overlay( L"CoDBlackOps", L"Call of Duty®: Black Ops II - Multiplayer", true /*Read comments regarding this*/ );
 
-		if ( !overlay.is_initialized( ) )
-			return -1;
-
 		MSG m;
 		ZeroMemory( &m, sizeof( m ) );
 
